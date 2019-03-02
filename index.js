@@ -453,7 +453,7 @@ app.post('/move', (request, response) => {
   console.log('  ')
   
   var snakeMove
-  var healthSafetyFactor = 95
+  var healthSafetyFactor = 98
  
   let snake = {
     health: request.body.you.health, //Health <=100
@@ -524,9 +524,9 @@ app.post('/move', (request, response) => {
   }
   //~~~~~~~~~~~~~~~~~~~~~~~END TURN ONE~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   //~~~~~~~~~~~~~~~~~~~~~~~TURN TWO~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  if(gameInfo.turn === 2){
-    snakeMove = snakeDirection(snake.body)
-  }
+  //if(gameInfo.turn === 2){
+  //  snakeMove = snakeDirection(snake.body)
+  //}
   //~~~~~~~~~~~~~~~~~~~~~~~END TURN TWO~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   if(gameInfo.turn>20){
     if(gameInfo.boardWidth> (snake.body.length + 2)){
@@ -537,7 +537,7 @@ app.post('/move', (request, response) => {
     
   }
 
-  if(gameInfo.turn > 2 && snake.health > healthSafetyFactor){
+  if(gameInfo.turn >= 2 && snake.health > healthSafetyFactor){
     //console.log('try to run tail finder')
     //console.log('tail finding function', getFakeTail(snake.body))
     var tailpath = [];
