@@ -118,15 +118,27 @@ function checkCollison(snakeBody, move, gameInfo){
 
   if(move === 'left'){
     x = x -1
+    if(x<0){
+      x=0
+    }
   }
   if(move === 'right'){
     x = x + 1
+    if(x === gameInfo.boardWidth){
+      x=gameInfo.boardWidth - 1
+    }
   }
   if(move === 'up'){
     y = y - 1
+    if(y<0){
+      x=0
+    }
   }
   if(move === 'down'){
     y = y + 1
+    if(y === gameInfo.boardHeight){
+      y=gameInfo.boardHeight - 1
+    }
   }
   console.log('x =' , x, 'y=', y)
   var j;
@@ -338,11 +350,15 @@ function findFoodPath(snakeBody, gameInfo, element){
     for (i=0; i < gameInfo.snakes[j].body.length; i++) { // for each alive snake
         grid.setWalkableAt(gameInfo.snakes[j].body[i].x, gameInfo.snakes[j].body[i].y, false);
     }
-    //dont go where snake heads can go
-    grid.setWalkableAt((gameInfo.snakes[j].body[0].x - 1), (gameInfo.snakes[j].body[0].y - 1), false);
-    grid.setWalkableAt((gameInfo.snakes[j].body[0].x + 1), (gameInfo.snakes[j].body[0].y + 1), false);
-    grid.setWalkableAt((gameInfo.snakes[j].body[0].x - 1), (gameInfo.snakes[j].body[0].y + 1), false);
-    grid.setWalkableAt((gameInfo.snakes[j].body[0].x + 1), (gameInfo.snakes[j].body[0].y - 1), false);
+
+    var newx = gameInfo.snakes[j].body[0].x
+    var newy = gameInfo.snakes[j].body[0].y
+    if(newx > 0 && newy > 0 && newx < (gameInfo.boardWidth-1) && newy < (gameInfo.boardHeight-1)) {
+      grid.setWalkableAt((newx - 1), (newy - 1), false);
+      grid.setWalkableAt((newx + 1), (newy+ 1), false);
+      grid.setWalkableAt((newx - 1), (newy + 1), false);
+      grid.setWalkableAt((newx + 1), (newy - 1), false);
+    }
   }
 // console.log('generated food path grid')
   var finder = new PF.AStarFinder();
@@ -363,6 +379,15 @@ function tailfinder(snakeBody, gameInfo, taillocation){
     for (i=0; i < gameInfo.snakes[j].body.length; i++) { // for each alive snake
         grid.setWalkableAt(gameInfo.snakes[j].body[i].x, gameInfo.snakes[j].body[i].y, false);
     }
+    var newx = gameInfo.snakes[j].body[0].x
+    var newy = gameInfo.snakes[j].body[0].y
+    if(newx > 0 && newy > 0 && newx < (gameInfo.boardWidth-1) && newy < (gameInfo.boardHeight-1)) {
+      grid.setWalkableAt((newx - 1), (newy - 1), false);
+      grid.setWalkableAt((newx + 1), (newy+ 1), false);
+      grid.setWalkableAt((newx - 1), (newy + 1), false);
+      grid.setWalkableAt((newx + 1), (newy - 1), false);
+    }
+
   }
 // console.log('generated food path grid')
   var finder = new PF.AStarFinder();
@@ -563,7 +588,7 @@ app.post('/move', (request, response) => {
   }
 
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~START FOOD SEARCH~~~~~~~~~~~~~~~~~~~
-  if(snake.health < healthSafetyFactor){ //go find nearest food
+  if(snake.health <= healthSafetyFactor){ //go find nearest food
     console.log('SNAKE IS HUNGRY!!!!')
     if(gameInfo.foodLocations.length !== 0){ // if there is food one the board
       console.log('foodpath is ', nearFoodPath)
