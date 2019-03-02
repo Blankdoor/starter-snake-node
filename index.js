@@ -148,6 +148,21 @@ function checkCollison(snakeBody, move, gameInfo){
   var yproblem = 'false'
   var collison = 'false'
 
+  if((x < 0) || x >= (gameInfo.boardWidth - 1)){
+    xproblem = 'true'
+    console.log('wall condition x .....', xproblem)
+  }
+  if(y <0 || y >= (gameInfo.boardHeight - 1)){
+    yproblem = 'true'
+    console.log('wall condition y .....', yproblem)
+  }
+
+  if(yproblem === 'true' && xproblem === 'true'){
+    collison = 'true'
+    console.log('there will be a collison')
+  }
+
+
   for (j=0; j < gameInfo.snakes.length; j++) { // iterate though all the alive snakes array including me
     console.log('check collisona against ', gameInfo.snakes[j].id)
 
@@ -560,7 +575,7 @@ app.post('/move', (request, response) => {
       if(thing[1]>snake.body[0].y){ //new tail is -y direction
         snakeMove = 'down'
       }
-    } else if(tailpath.length === 0 || tailpath.length === 1){
+    } else {
       
       snakeMove = snakeDirection(snake.body)
       console.log('no valid tailpath snake will just move in the direction he was going , ',snakeMove)
@@ -597,10 +612,11 @@ app.post('/move', (request, response) => {
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~START FOOD SEARCH~~~~~~~~~~~~~~~~~~~
   if(snake.health <= healthSafetyFactor){ //go find nearest food
     console.log('SNAKE IS HUNGRY!!!!')
-    if(gameInfo.foodLocations.length !== 0){ // if there is food one the board
+    if(gameInfo.foodLocations.length !== 0 && nearFoodPath.length !== 0){ // if there is food one the board
       console.log('foodpath is ', nearFoodPath)
       var next = nearFoodPath[1] // find out what direction the path should be
       console.log('Foodpath 1 step away ', nearFoodPath[1])
+
       if(next[0] !== snake.body[0].x){
         console.log(next[0], 'xpath')
         if(next[0] > snake.body[0].x){
@@ -616,8 +632,37 @@ app.post('/move', (request, response) => {
           snakeMove = 'up'
           }
         }
-    } else if (gameInfo.foodLocations.length === 0){
-      console.log('no way to get to food, no snake move set here')
+    } else {
+      //console.log('no way to get to food, no snake move set here')
+
+      snakeMove = snakeDirection(snake.body)
+      console.log('no valid foodpath snake will just move in the direction he was going , ',snakeMove)
+
+      var lies = snakeMove
+      var temp4 = checkCollison(snake.body, lies, gameInfo)
+      console.log('temp4', temp4)
+      
+      if(temp4 === 'true'){
+        //find another path
+        console.log('no valid tailpath snake will colide on this course')
+        var temp = 'right'
+        var loop;
+        var options = ['left','right','up','down'];
+        //console.log('options0', options[0])
+
+        for(loop = 0; loop < 4; loop ++){
+          console.log('options loop', options[loop])
+          var temp6 = checkCollison(snake.body, options[loop], gameInfo)
+          console.log('for the direciton of ',options[loop], 'snake thinks that collison is',temp6)
+          if(temp6 === 'false'){
+            temp = options[loop]
+            console.log('go ', temp)
+          }  
+        }
+
+        snakeMove = temp
+      }
+
     } 
   }
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~END FOOD SEARCH ~~~~~~~~~~~~~~~~~~~~
