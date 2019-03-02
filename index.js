@@ -353,12 +353,16 @@ function findFoodPath(snakeBody, gameInfo, element){
 
     var newx = gameInfo.snakes[j].body[0].x
     var newy = gameInfo.snakes[j].body[0].y
-    if(newx > 0 && newy > 0 && newx < (gameInfo.boardWidth-1) && newy < (gameInfo.boardHeight-1)) {
-      grid.setWalkableAt((newx - 1), (newy - 1), false);
-      grid.setWalkableAt((newx + 1), (newy+ 1), false);
-      grid.setWalkableAt((newx - 1), (newy + 1), false);
-      grid.setWalkableAt((newx + 1), (newy - 1), false);
+
+    if(gameInfo.snakes[j].body[0] !== snakeBody[0]){ // if its not me
+      if(newx > 0 && newy > 0 && newx < (gameInfo.boardWidth-1) && newy < (gameInfo.boardHeight-1)) {
+        grid.setWalkableAt((newx - 1), (newy - 1), false);
+        grid.setWalkableAt((newx + 1), (newy + 1), false);
+        grid.setWalkableAt((newx - 1), (newy + 1), false);
+        grid.setWalkableAt((newx + 1), (newy - 1), false);
+      }
     }
+    
   }
 // console.log('generated food path grid')
   var finder = new PF.AStarFinder();
@@ -381,13 +385,16 @@ function tailfinder(snakeBody, gameInfo, taillocation){
     }
     var newx = gameInfo.snakes[j].body[0].x
     var newy = gameInfo.snakes[j].body[0].y
-    if(newx > 0 && newy > 0 && newx < (gameInfo.boardWidth-1) && newy < (gameInfo.boardHeight-1)) {
-      grid.setWalkableAt((newx - 1), (newy - 1), false);
-      grid.setWalkableAt((newx + 1), (newy+ 1), false);
-      grid.setWalkableAt((newx - 1), (newy + 1), false);
-      grid.setWalkableAt((newx + 1), (newy - 1), false);
-    }
 
+    if(gameInfo.snakes[j].body[0] !== snakeBody[0]){ // if its not me
+      if(newx > 0 && newy > 0 && newx < (gameInfo.boardWidth-1) && newy < (gameInfo.boardHeight-1)) {
+        grid.setWalkableAt((newx - 1), (newy - 1), false);
+        grid.setWalkableAt((newx + 1), (newy + 1), false);
+        grid.setWalkableAt((newx - 1), (newy + 1), false);
+        grid.setWalkableAt((newx + 1), (newy - 1), false);
+      }
+    }
+    
   }
 // console.log('generated food path grid')
   var finder = new PF.AStarFinder();
