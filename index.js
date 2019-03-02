@@ -492,7 +492,12 @@ app.post('/move', (request, response) => {
   }
   //~~~~~~~~~~~~~~~~~~~~~~~END TURN TWO~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   if(gameInfo.turn>20){
-    healthSafetyFactor = 50
+    if(gameInfo.boardWidth> (snake.body.length + 2)){
+      healthSafetyFactor = 90
+    } else {
+      healthSafetyFactor = 50
+    }
+    
   }
 
   if(gameInfo.turn > 2 && snake.health > healthSafetyFactor){
