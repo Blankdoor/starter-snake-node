@@ -72,6 +72,28 @@ function snakeDirection(snakeBody) {
     
   return direction
 }
+function tailDirection(snakeBody) {
+  //console.log('we made it to the tail direction function')
+  //function calculates the direction a tail is pointing in (opposit of head direction)
+  var direction  //declaration
+  var tail = snakeBody.length -1
+  direction = 'up'//fall though case & turn 0 case
+      
+  if(snakeBody[tail].x < snakeBody[tail-1].x  ){ //tail points left
+    direction = 'left'
+  }
+  if(snakeBody[tail].x > snakeBody[tail-1].x ){//tail points right
+    direction = 'right'
+  }
+  if(snakeBody[tail].y < snakeBody[tail-1].y ){//tail points up
+    direction = 'up'
+  }
+  if(snakeBody[tail].y > snakeBody[tail-1].y ){//tail points down
+    direction = 'down'
+  }
+    
+  return direction
+}
 
 function isSnakeOnWallx(snakeBody,gameInfo){
   if (snakeBody[0].x===0 || snakeBody[0].x===(gameInfo.boardWidth -1)){
@@ -88,7 +110,7 @@ function isSnakeOnWally(snakeBody,gameInfo){
 
 function wallAvoidance(snakeBody,gameInfo){
   var snakeMove
-  snakeMove = snakeDirection(snakeBody)  //Fall though case
+  //snakeMove = snakeDirection(snakeBody)  //Fall though case
 
   //if the snake is at the top wall and going up, move left or right
   if(snakeBody[0].y===0 && snakeDirection(snakeBody)==='up'){
@@ -124,24 +146,55 @@ function wallAvoidance(snakeBody,gameInfo){
   }
   return snakeMove
 }
-/*function moveToFood(snakeBody, foodArray){
-  var snakeMove
-  console.log(foodArray)
-  //calculate nearest food location from array and from snake head
-  //move towards food in a way that wont break the snake, if direction left and food up and right, move up first
-  return snakeMove
+
+function leaveCorner(snakeBody, gameInfo){
+  var move
+  if(snakeBody[0].x === 0 && snakeBody[0].y === 0){
+    console.log('snake is in the top left corner')
+    if(snakeDirection(snakeBody) === 'left'){
+      move = 'down'
+    } else if(snakeDirection(snakeBody) === 'up'){
+      move = 'right'
+    }
+  }
+  if(snakeBody[0].x === 0 && snakeBody[0].y === (gameInfo.boardHeight-1)){
+    console.log('snake is in the bottom left corner')
+    if(snakeDirection(snakeBody) === 'left'){
+      move = 'up'
+    } else if(snakeDirection(snakeBody) === 'down'){
+      move = 'right'
+    }
+  }
+  if(snakeBody[0].x === (gameInfo.boardWidth-1) && snakeBody[0].y === (gameInfo.boardHeight-1)){
+    console.log('snake is in the bottom right corner')
+    if(snakeDirection(snakeBody) === 'right'){
+      move = 'up'
+    } else if(snakeDirection(snakeBody) === 'down'){
+      move = 'left'
+    }
+  }
+  if(snakeBody[0].x === (gameInfo.boardWidth-1) && snakeBody[0].y === 0){
+    console.log('snake is in the top right corner')
+    if(snakeDirection(snakeBody) === 'right'){
+      move = 'down'
+    } else if(snakeDirection(snakeBody) === 'up'){
+      move = 'left'
+    }
+  }
+
+  console.log('recomend corner move', move)
+  return move
 }
-*/
 
 function findNearstWall(snakeBody,gameInfo){
   var snakeMove
-  snakeMove = 'left' //fall though case
+  //snakeMove = 'left' //fall though case
   if(snakeBody[0].x < (gameInfo.boardWidth-1)/2){ //left side
     if(snakeBody[0].y < (gameInfo.boardHeight-1)/2){ //top
       snakeMove = 'left'
       console.log('top left')
     } else if (snakeBody[0].y > (gameInfo.boardHeight-1)/2){ //bottom
-    snakeMove = 'down'
+      snakeMove = 'down'
       console.log('bottom left')
     } else {
       snakeMove = 'left'
@@ -171,8 +224,102 @@ function findNearstWall(snakeBody,gameInfo){
     }
   }
 
+  //If the snake starts on the wall do something special
+  //if the snake starts at the top wall
+  if(snakeBody[0].y===0){
+    snakeMove = 'down'
+  }
+  //if the snake is at the bottom wall and going down, move left or right
+  if(snakeBody[0].y===(gameInfo.boardHeight-1)){
+    snakemove = 'up'
+  }
+  //if the snake is at the right wall and going right, move up or down
+  if(snakeBody[0].x===(gameInfo.boardWidth-1)){
+    snakemove = 'left'
+  }
+  
+  //if the snake is at the left wall and going left, move up or down
+  if(snakeBody[0].x===0){
+    snakemove = 'right'
+  }
+
   return snakeMove
 }
+
+function findFoodPath(snakeBody, gameInfo, element){
+//  console.log("generating food path")
+  var grid = new PF.Grid(gameInfo.boardWidth, gameInfo.boardHeight); 
+  
+  var j;
+  var i;
+  for (j=0; j < gameInfo.snakes.length; j++) { // iterate though all the alive snakes including me
+    //console.log('alive snake ', j, 'length ',gameInfo.snakes[j].body.length)
+    for (i=0; i < gameInfo.snakes[j].body.length; i++) { // for each alive snake
+        grid.setWalkableAt(gameInfo.snakes[j].body[i].x, gameInfo.snakes[j].body[i].y, false);
+    }
+  }
+// console.log('generated food path grid')
+  var finder = new PF.AStarFinder();
+  var path = finder.findPath(snakeBody[0].x, snakeBody[0].y, gameInfo.foodLocations[element].x, gameInfo.foodLocations[element].y, grid);
+//  console.log('path lenght ', path.length)
+// console.log('path ', path)
+  return path
+}
+
+function tailfinder(snakeBody, gameInfo, taillocation){
+  console.log('tail finder path')
+  var grid = new PF.Grid(gameInfo.boardWidth, gameInfo.boardHeight); 
+  
+  var j;
+  var i;
+  for (j=0; j < gameInfo.snakes.length; j++) { // iterate though all the alive snakes including me
+    //console.log('alive snake ', j, 'length ',gameInfo.snakes[j].body.length)
+    for (i=0; i < gameInfo.snakes[j].body.length; i++) { // for each alive snake
+        grid.setWalkableAt(gameInfo.snakes[j].body[i].x, gameInfo.snakes[j].body[i].y, false);
+    }
+  }
+// console.log('generated food path grid')
+  var finder = new PF.AStarFinder();
+  var path = finder.findPath(snakeBody[0].x, snakeBody[0].y, taillocation.x, taillocation.y, grid);
+  console.log('tailpath lenght ', path.length)
+// console.log('path ', path)
+  return path
+}
+
+function getFakeTail(snakeBody){
+  let faketail = {x: 0, y:0}
+  //console.log ('starting faketail', faketail)
+  var tail = snakeBody.length -1
+
+  faketail.x = snakeBody[tail].x
+  faketail.y = snakeBody[tail].y
+  //console.log (' snakebodytailx', snakeBody[tail].x)
+  //console.log (' init faketailx', faketail.x)
+  //console.log (' init faketail', faketail)
+
+  if(tailDirection(snakeBody) === 'up'){
+    faketail.y = snakeBody[tail].y -1
+  }
+  if(tailDirection(snakeBody) === 'down'){
+    faketail.y = snakeBody[tail].y +1
+    }
+  if(tailDirection(snakeBody) === 'right'){
+    console.log('we should get here')
+    faketail.x = snakeBody[tail].x +1
+  }
+  if(tailDirection(snakeBody) === 'left'){
+    faketail.x = snakeBody[tail].x -1
+  }
+  //console.log('made a fake tail')
+  if(faketail.x<0){ // catch some stupid wall cases probably needs more thought but hey its 2am
+    faketail.x = 0
+  }
+  if(faketail.y<0){
+    faketail.y = 0
+  }
+  return faketail
+}
+
 
 //~~~~~~~~~~~~~~End of fun funtion definitions
 
@@ -184,86 +331,167 @@ function findNearstWall(snakeBody,gameInfo){
 
 app.post('/move', (request, response) => {
   // NOTE: Do something here to generate your move
-  console.log("S")
+  console.log('  ')
+  console.log('  ')
   
   var snakeMove
+  var healthSafetyFactor = 50
  
   let snake = {
     health: request.body.you.health, //Health <=100
     body: request.body.you.body, // array of snake positions
-    length: request.body.you.body.length   //find size of snake... important for later.
+    length: request.body.you.body.length,   //find size of snake... important for later.
+    id: request.body.you.id
   }
 
   let gameInfo = {
     turn: request.body.turn, // turn #
     boardHeight: request.body.board.height,
     boardWidth: request.body.board.width,
-    foodLocations: request.body.board.food
+    foodLocations: request.body.board.food,
+    snakes: request.body.board.snakes
   }
 
-  //~~~~~~~~~~~~~~~~~~~~~~~~Prepare for path finding~~~~~~~~~~~~~~~~~~
-  var grid = new PF.Grid(gameInfo.boardWidth, gameInfo.boardHeight); 
-  
-  var i;
-  for (i=0; i < snake.body.length; i++) {
-    grid.setWalkableAt(snake.body[i].x, snake.body[i].y, false);
+  snakeMove = snakeDirection(snake.body) // just keep going the direction you were going before
+
+  //~~~~~~~~~~~~~~~~~~~~~~~~Prepare for food path finding~~~~~~~~~~~~~~~~~~
+  var foodpath = []; //create empty array
+  var q;
+  var nearFoodPath;
+  if(gameInfo.foodLocations.length !== 0){ // if there is food on the board
+    for (q=0; q < gameInfo.foodLocations.length; q++) { // iterate though the food array and find the nearst food location
+      foodpath[q] = findFoodPath(snake.body, gameInfo,q)
+      if(q===0){
+        nearFoodPath = foodpath[q]
+      }
+      if(q > 0){
+        if(foodpath[q].length < nearFoodPath.length){
+          nearFoodPath = foodpath[q]
+        }
+      }
+    }
   }
-  var finder = new PF.AStarFinder();
-  var foodpath = finder.findPath(snake.body[0].x, snake.body[0].y, gameInfo.foodLocations[0].x, gameInfo.foodLocations[0].y, grid);
-//~~~~~~~~~~~~~~~~~~~~~~~~END Prep for path finding
 
-
+  //~~~~~~~~~~~~~~~~~~~~~~~~END Prep for food path finding
 
   //Print out some game info to the console
-  console.log('Turn: ',gameInfo.turn, '.............Begining MOVE Calculations............')
+  console.log('Turn: ',gameInfo.turn, '  ............. MOVE Calculations............')
+  //console.log('Nearst Food Path ', nearFoodPath, 'Distance ', nearFoodPath.length)
+  //console.log('MySnake ',snake.id, 'snake array  ', snake.body, 'snake Length  ', snake.length)
+  //console.log('Number of enemies ', gameInfo.snakes.length -1)
+
   console.log(wallCollisonWarning(snake.body,gameInfo))
   console.log('Current Snake Direction...', snakeDirection(snake.body))
   console.log('Snake Health...', snake.health)
-  console.log('Snake Length...', snake.length)
-  console.log('Board Size...', gameInfo.boardHeight, ' x ', gameInfo.boardWidth)
+  //console.log('Board Size...', gameInfo.boardHeight, ' x ', gameInfo.boardWidth)
   
-
-  //******/snakeMove = snakeDirection(snake.body,gameInfo) //sets snakemove to something
-
   //~~~~~~~~~~~~~SNAKE LOGIC~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   //~~~~~~~~~~~~~~~~~~~~~~~TURN ZERO~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   if(gameInfo.turn === 0){
-    snakeMove = findNearstWall(snake.body,gameInfo) // go to a space that you can protect!
+    //snakeMove = findNearstWall(snake.body,gameInfo) // go to a space that you can protect!
+    if(snake.body[0].y !== 0){
+      snakeMove = 'up'
+    } else if(snake.body[0].y ===0){
+      snakeMove = 'down'
+    }
   }
   //~~~~~~~~~~~~~~~~~~~~~~~END TURN ZERO~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  //~~~~~~~~~~~~~~~~~~~~~~~TURN One~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  if(gameInfo.turn === 1){
+    if(snake.body[0].x !== 0){
+      snakeMove = 'left'
+    } else if(snake.body[0].x ===0){
+      snakeMove = 'right'
+    }
+  }
+  //~~~~~~~~~~~~~~~~~~~~~~~END TURN ONE~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  //~~~~~~~~~~~~~~~~~~~~~~~TURN TWO~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  if(gameInfo.turn === 2){
+    snakeMove = snakeDirection(snake.body)
+  }
+  //~~~~~~~~~~~~~~~~~~~~~~~END TURN TWO~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~START FOOD SEARCH~~~~~~~~~~~~~~~~~~~
-  if(snake.health < 101){ //go find nearest food
-    console.log('SNAKE IS HUNGRY!!!!')
-    var next = foodpath[1] // find out what direction the path should be
-    
-    if(next[0] !== snake.body[0].x){
-      console.log(next[0], 'xpath')
-      if(next[0] > snake.body[0].x){
+  if(gameInfo.turn > 2 && snake.health > healthSafetyFactor){
+    //console.log('try to run tail finder')
+    //console.log('tail finding function', getFakeTail(snake.body))
+    var tailpath = [];
+    var thing;
+    tailpath = tailfinder(snake.body, gameInfo, getFakeTail(snake.body))
+    console.log('tailpath', tailpath)
+    if(tailpath.length !== 0 && tailpath.length !== 1){
+      thing = tailpath[1]
+      //console.log('thing', thing)
+      if(thing[0]>snake.body[0].x){ //new tail is x direction
+        //console.log('snake should chose to move right here')
         snakeMove = 'right'
-      } else if (next[0] < snake.body[0].x){
+      }
+      if(thing[0]<snake.body[0].x){ //new tail is -x direction
         snakeMove = 'left'
       }
-    } else if (next[1] !== snake.body[0].y){
-      console.log(next[1], 'ypath')
-        if(next[1] > snake.body[0].y){
-        snakeMove = 'down'
-        } else if (next[1] < snake.body[0].y){
+      if(thing[1]<snake.body[0].y){ //new tail is y direction
         snakeMove = 'up'
-        }
       }
-  //snakeMove = moveToFood(snake.body,gameInfo.foodLocations)
+      if(thing[1]>snake.body[0].y){ //new tail is -y direction
+        snakeMove = 'down'
+      }
+    } else if(tailpath.length === 0 || tailpath.length === 1){
+      console.log('no valid tailpath snake will just move in the direction he was going')
+      snakeMove = snakeDirection(snake.body)
+    }
+  }
+
+  //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~START FOOD SEARCH~~~~~~~~~~~~~~~~~~~
+  if(snake.health < healthSafetyFactor){ //go find nearest food
+    console.log('SNAKE IS HUNGRY!!!!')
+    if(gameInfo.foodLocations.length !== 0){ // if there is food one the board
+      console.log('foodpath is ', nearFoodPath)
+      var next = nearFoodPath[1] // find out what direction the path should be
+      console.log('Foodpath 1 step away ', nearFoodPath[1])
+      if(next[0] !== snake.body[0].x){
+        console.log(next[0], 'xpath')
+        if(next[0] > snake.body[0].x){
+          snakeMove = 'right'
+        } else if (next[0] < snake.body[0].x){
+          snakeMove = 'left'
+        }
+      } else if (next[1] !== snake.body[0].y){
+        console.log(next[1], 'ypath')
+          if(next[1] > snake.body[0].y){
+          snakeMove = 'down'
+          } else if (next[1] < snake.body[0].y){
+          snakeMove = 'up'
+          }
+        }
+    } else if (gameInfo.foodLocations.length === 0){
+      console.log('no way to get to food, no snake move set here')
+    } 
   }
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~END FOOD SEARCH ~~~~~~~~~~~~~~~~~~~~
 
+
+  
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~START Wall avoidance~~~~~~~~~~~~~~~~
   //if the snake is going to wall crash, do something
-  //if(isSnakeOnWallx(snake.body,gameInfo)==='true' || isSnakeOnWally(snake.body,gameInfo)==='true'){
-  //  snakeMove = wallAvoidance(snake.body,gameInfo)   
-  //}
+  if((snake.body[0].x ===0 && snakeDirection(snake.body) === 'left') || 
+     (snake.body[0].y ===0 && snakeDirection(snake.body) === 'up') ||
+     (snake.body[0].y === (gameInfo.boardHeight-1) && snakeDirection(snake.body) === 'down') ||
+     (snake.body[0].x ===(gameInfo.boardWidth-1) && snakeDirection(snake.body) === 'right')){
+    console.log('wall avoidance')
+    snakeMove = wallAvoidance(snake.body,gameInfo) 
+    }
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~END wall Avoidance~~~~~~~~~~~~~~~~~~~
   
-  
+  //~~~~~~~~~~~~~~~~~~~~~~~~~~Snakes in a corner~~~~~~~~~~~~~~~~~~~~~~
+  // When the snake is in one of the 4 corners he has only 1 move available so take it
+  if((snake.body[0].x === 0 && snake.body[0].y === 0) || 
+     (snake.body[0].x === 0 && snake.body[0].y === (gameInfo.boardHeight-1))|| 
+     (snake.body[0].x === (gameInfo.boardWidth-1) && snake.body[0].y === (gameInfo.boardHeight-1))|| 
+     (snake.body[0].x === (gameInfo.boardWidth-1) && snake.body[0].y === 0)){
+    console.log('made it to leave corner')
+    snakeMove = leaveCorner(snake.body, gameInfo)
+  }
+  //~~~~~~~~~~~~~~~~~~~~~~~~~~END Snake in a corner~~~~~~~~~~~~~~~~~~~
+
 
 
 
