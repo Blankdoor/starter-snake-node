@@ -416,7 +416,7 @@ app.post('/move', (request, response) => {
   console.log('  ')
   
   var snakeMove
-  var healthSafetyFactor = 50
+  var healthSafetyFactor = 95
  
   let snake = {
     health: request.body.you.health, //Health <=100
@@ -491,6 +491,9 @@ app.post('/move', (request, response) => {
     snakeMove = snakeDirection(snake.body)
   }
   //~~~~~~~~~~~~~~~~~~~~~~~END TURN TWO~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  if(gameInfo.turn>20){
+    healthSafetyFactor = 50
+  }
 
   if(gameInfo.turn > 2 && snake.health > healthSafetyFactor){
     //console.log('try to run tail finder')
