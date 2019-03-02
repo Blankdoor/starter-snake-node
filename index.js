@@ -148,12 +148,14 @@ function checkCollison(snakeBody, move, gameInfo){
   var yproblem = 'false'
   var collison = 'false'
 
-  if((x < 0) || x >= (gameInfo.boardWidth - 1)){
-    xproblem = 'true'
+  if((x < 0) || x > (gameInfo.boardWidth - 1)){
+    //xproblem = 'true'
+    collison = 'true'
     console.log('wall condition x .....', xproblem)
   }
-  if(y <0 || y >= (gameInfo.boardHeight - 1)){
-    yproblem = 'true'
+  if(y <0 || y > (gameInfo.boardHeight - 1)){
+    //yproblem = 'true'
+    collison = 'true'
     console.log('wall condition y .....', yproblem)
   }
 
@@ -402,11 +404,17 @@ function tailfinder(snakeBody, gameInfo, taillocation){
     var newy = gameInfo.snakes[j].body[0].y
 
     if(gameInfo.snakes[j].body[0] !== snakeBody[0]){ // if its not me
+      console.log('THING 1')
       if(newx > 0 && newy > 0 && newx < (gameInfo.boardWidth-1) && newy < (gameInfo.boardHeight-1)) {
+        console.log('THING 2')
         grid.setWalkableAt((newx - 1), (newy - 1), false);
+        console.log('THING 3')
         grid.setWalkableAt((newx + 1), (newy + 1), false);
+        console.log('THING 4')
         grid.setWalkableAt((newx - 1), (newy + 1), false);
+        console.log('THING 5')
         grid.setWalkableAt((newx + 1), (newy - 1), false);
+        console.log('THING 6')
       }
     }
     
@@ -419,7 +427,7 @@ function tailfinder(snakeBody, gameInfo, taillocation){
   return path
 }
 
-function getFakeTail(snakeBody){
+function getFakeTail(snakeBody, gameInfo){
   let faketail = {x: 0, y:0}
   //console.log ('starting faketail', faketail)
   var tail = snakeBody.length -1
@@ -449,6 +457,12 @@ function getFakeTail(snakeBody){
   }
   if(faketail.y<0){
     faketail.y = 0
+  }
+  if(faketail.x > (gameInfo.boardWidth-1)){ // last min addtions
+    faketail.x = gameInfo.boardWidth-1
+  }
+  if(faketail.y > (gameInfo.boardHeight-1)){
+    faketail.y = gameInfo.boardHeight-1
   }
   return faketail
 }
@@ -557,7 +571,7 @@ app.post('/move', (request, response) => {
     //console.log('tail finding function', getFakeTail(snake.body))
     var tailpath = [];
     var thing;
-    tailpath = tailfinder(snake.body, gameInfo, getFakeTail(snake.body))
+    tailpath = tailfinder(snake.body, gameInfo, getFakeTail(snake.body, gameInfo))
     console.log('tailpath', tailpath)
     if(tailpath.length !== 0 && tailpath.length !== 1){
       thing = tailpath[1]
