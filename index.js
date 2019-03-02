@@ -338,6 +338,11 @@ function findFoodPath(snakeBody, gameInfo, element){
     for (i=0; i < gameInfo.snakes[j].body.length; i++) { // for each alive snake
         grid.setWalkableAt(gameInfo.snakes[j].body[i].x, gameInfo.snakes[j].body[i].y, false);
     }
+    //dont go where snake heads can go
+    grid.setWalkableAt((gameInfo.snakes[j].body[0].x - 1), (gameInfo.snakes[j].body[0].y - 1), false);
+    grid.setWalkableAt((gameInfo.snakes[j].body[0].x + 1), (gameInfo.snakes[j].body[0].y + 1), false);
+    grid.setWalkableAt((gameInfo.snakes[j].body[0].x - 1), (gameInfo.snakes[j].body[0].y + 1), false);
+    grid.setWalkableAt((gameInfo.snakes[j].body[0].x + 1), (gameInfo.snakes[j].body[0].y - 1), false);
   }
 // console.log('generated food path grid')
   var finder = new PF.AStarFinder();
