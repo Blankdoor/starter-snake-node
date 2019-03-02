@@ -108,6 +108,61 @@ function isSnakeOnWally(snakeBody,gameInfo){
   return 'false'
 }
 
+function checkCollison(snakeBody, move, gameInfo){
+  var x;
+  var y;
+  x = snakeBody[0].x
+  y = snakeBody[0].y
+
+  console.log('snake' , snakeBody[0])
+
+  if(move === 'left'){
+    x = x -1
+  }
+  if(move === 'right'){
+    x = x + 1
+  }
+  if(move === 'up'){
+    y = y - 1
+  }
+  if(move === 'down'){
+    y = y + 1
+  }
+  console.log('x =' , x, 'y=', y)
+  var j;
+  var i;
+  var k;
+  var xproblem = 'false'
+  var yproblem = 'false'
+  var collison = 'false'
+
+  for (j=0; j < gameInfo.snakes.length; j++) { // iterate though all the alive snakes array including me
+    console.log('check collisona against ', gameInfo.snakes[j].id)
+
+    for (i=0; i < gameInfo.snakes[j].body.length; i++) { // for the length of each alive snake
+
+      if(gameInfo.snakes[j].body[i].x === x){
+        xproblem = 'true'
+
+        for (k=0; k < gameInfo.snakes[j].body.length; k++){
+
+          if(gameInfo.snakes[j].body[i].y === y){
+            yproblem = 'true'
+          }
+        }
+
+      }        
+    } 
+  }
+
+  if(yproblem === 'true' && xproblem === 'true'){
+    collison = 'true'
+    console.log('there will be a collison')
+  }
+
+return collison
+}
+
 function wallAvoidance(snakeBody,gameInfo){
   var snakeMove
   //snakeMove = snakeDirection(snakeBody)  //Fall though case
@@ -116,32 +171,58 @@ function wallAvoidance(snakeBody,gameInfo){
   if(snakeBody[0].y===0 && snakeDirection(snakeBody)==='up'){
     if(snakeBody[0].x > (gameInfo.boardWidth/2)){      
       snakeMove = 'left'
+      if(checkCollison(snakeBody, snakeMove, gameInfo) === 'true'){
+        snakeMove = 'right'
+      }
     } else {     
       snakeMove = 'right'
+      if(checkCollison(snakeBody, snakeMove, gameInfo) === 'true'){
+        snakeMove = 'left'
+      }
     }
   }
+
+
   //if the snake is at the bottom wall and going down, move left or right
   if(snakeBody[0].y===(gameInfo.boardHeight-1) && snakeDirection(snakeBody)==='down'){
     if(snakeBody[0].x > (gameInfo.boardWidth/2)){      
       snakeMove = 'left'
+      if(checkCollison(snakeBody, snakeMove, gameInfo) === 'true'){
+        snakeMove = 'right'
+      }
     } else {      
       snakeMove = 'right'
+      if(checkCollison(snakeBody, snakeMove, gameInfo) === 'true'){
+        snakeMove = 'left'
+      }
     }
   }
   //if the snake is at the right wall and going right, move up or down
   if(snakeBody[0].x===(gameInfo.boardWidth-1) && snakeDirection(snakeBody)==='right'){
     if(snakeBody[0].y > (gameInfo.boardHeight/2)){
       snakeMove = 'up'
+      if(checkCollison(snakeBody, snakeMove, gameInfo) === 'true'){
+        snakeMove = 'down'
+      }
     } else {
       snakeMove = 'down'
+      if(checkCollison(snakeBody, snakeMove, gameInfo) === 'true'){
+        snakeMove = 'up'
+      }
     }
   }
   //if the snake is at the left wall and going left, move up or down
   if(snakeBody[0].x===0 && snakeDirection(snakeBody)==='left'){
     if(snakeBody[0].y > (gameInfo.boardHeight/2)){
       snakeMove = 'up'
+      if(checkCollison(snakeBody, snakeMove, gameInfo) === 'true'){
+        snakeMove = 'down'
+      }
     } else {
       snakeMove = 'down'
+      if(checkCollison(snakeBody, snakeMove, gameInfo) === 'true'){
+        snakeMove = 'up'
+      }
     }
   }
   return snakeMove
@@ -435,9 +516,37 @@ app.post('/move', (request, response) => {
         snakeMove = 'down'
       }
     } else if(tailpath.length === 0 || tailpath.length === 1){
-      console.log('no valid tailpath snake will just move in the direction he was going')
+      
       snakeMove = snakeDirection(snake.body)
+      console.log('no valid tailpath snake will just move in the direction he was going , ',snakeMove)
+
+      var lies = snakeMove
+      var temp4 = checkCollison(snake.body, lies, gameInfo)
+      console.log('temp4', temp4)
+      
+      if(temp4 === 'true'){
+        //find another path
+        console.log('no valid tailpath snake will colide on this course')
+        var temp = 'right'
+        var loop;
+        var options = ['left','right','up','down'];
+        //console.log('options0', options[0])
+
+        for(loop = 0; loop < 4; loop ++){
+          console.log('options loop', options[loop])
+          var temp6 = checkCollison(snake.body, options[loop], gameInfo)
+          console.log('for the direciton of ',options[loop], 'snake thinks that collison is',temp6)
+          if(temp6 === 'false'){
+            temp = options[loop]
+            console.log('go ', temp)
+          }  
+        }
+
+        snakeMove = temp
+      }
+      
     }
+
   }
 
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~START FOOD SEARCH~~~~~~~~~~~~~~~~~~~
