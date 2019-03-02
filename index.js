@@ -118,27 +118,27 @@ function checkCollison(snakeBody, move, gameInfo){
 
   if(move === 'left'){
     x = x -1
-    if(x<0){
-      x=0
-    }
+    //if(x<0){
+    //  x=0
+    //}
   }
   if(move === 'right'){
     x = x + 1
-    if(x === gameInfo.boardWidth){
-      x=gameInfo.boardWidth - 1
-    }
+    //if(x === gameInfo.boardWidth){
+    //  x=gameInfo.boardWidth - 1
+    //}
   }
   if(move === 'up'){
     y = y - 1
-    if(y<0){
-      x=0
-    }
+    //if(y<0){
+    //  x=0
+    //}
   }
   if(move === 'down'){
     y = y + 1
-    if(y === gameInfo.boardHeight){
-      y=gameInfo.boardHeight - 1
-    }
+    //if(y === gameInfo.boardHeight){
+    //  y=gameInfo.boardHeight - 1
+    //}
   }
   console.log('x =' , x, 'y=', y)
   var j;
